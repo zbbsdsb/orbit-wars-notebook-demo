@@ -1,0 +1,25 @@
+# Core dependencies
+kaggle-environments>=1.28.0
+numpy>=1.24.0
+pandas>=2.0.0
+matplotlib>=3.7.0
+jupyter>=1.0.0
+
+# Deep Learning (optional)
+torch>=2.0.0
+torchvision>=0.15.0
+
+# Reinforcement Learning (optional)
+gymnasium>=0.29.0
+stable-baselines3>=2.0.0
+
+# Utilities
+tqdm>=4.65.0
+pyyaml>=6.0
+python-json-logger>=2.0.7
+
+# Development
+pytest>=7.4.0
+black>=23.0.0
+flake8>=6.0.0
+mypy>=1.5.0
