@@ -44,6 +44,21 @@ The observation received by the agent each turn is a dictionary containing the f
 - **Range**: 0.025-0.05
 - **Description**: Rotation angular velocity of inner planets (orbiting planets) in radians/turn
 
+### comet_planet_ids
+- **Type**: `List[int]`
+- **Description**: List of planet IDs that are comets. Use this to distinguish comets from regular planets in the `planets` list.
+
+### comets
+- **Type**: `dict` (structured data)
+- **Description**: Comet group data containing:
+  - `paths`: List of paths for each comet group. Each path is a list of (x, y) coordinates the comet will follow.
+  - `path_index`: Current position index along the path for each comet group.
+- **Usage**: Can be used to predict future comet positions by looking ahead in the paths array.
+
+### initial_planets
+- **Type**: `List[List]`
+- **Description**: Initial planet positions at the start of the game. Useful for predicting orbital planet positions by calculating the orbit from the initial position.
+
 ## Action Space
 
 The action returned by the agent is a list, where each element is a move command:
@@ -194,6 +209,43 @@ def agent(observation, configuration):
     moves = []
 
     return moves
+```
+
+## Configuration Parameters
+
+The `configuration` dictionary passed to the agent function may contain:
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `cometSpeed` | float | 4.0 | Speed of comets (units/turn) |
+| `episodeSteps` | int | 500 | Maximum number of turns per episode |
+| `agentTimeout` | int | — | Time limit for agent execution (seconds) |
+
+## Kaggle CLI Commands
+
+### Submit an Agent
+```bash
+kaggle competitions submit -c orbit-wars -f main.py -m "Submission description"
+```
+
+### List Submissions
+```bash
+kaggle competitions submissions -c orbit-wars
+```
+
+### View Episode Details
+```bash
+kaggle competitions episodes -c orbit-wars -s <submission-id>
+```
+
+### Download Leaderboard
+```bash
+kaggle competitions leaderboard -c orbit-wars
+```
+
+### Download Competition Data
+```bash
+kaggle competitions download -c orbit-wars
 ```
 
 ## Environment Setup

@@ -5,14 +5,19 @@ Kaggle Competition Submission File
 Contributors: CeaserZhao, PrismScope
 """
 
-import random
-import math
-from typing import Dict, List, Any, Tuple
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from typing import Dict, List, Any
+from src.agents.heuristic_agent import HeuristicAgent, agent as heuristic_agent_func
 
 
-def agent(observation: Dict[str, Any], configuration: Dict[str, Any]) -> List[List[float]]:
+def agent(observation: Dict[str, Any], configuration: Dict[str, Any]) -> List[List]:
     """
     Main agent function for Orbit Wars competition.
+    
+    This function is called by the Kaggle environment for each game turn.
     
     Args:
         observation: Game state containing:
@@ -20,78 +25,65 @@ def agent(observation: Dict[str, Any], configuration: Dict[str, Any]) -> List[Li
             - planets: List of planets [id, owner, x, y, radius, ships, production]
             - fleets: List of fleets [id, owner, x, y, angle, from_planet_id, ships]
             - angular_velocity: Angular velocity of inner planets
+            - comet_planet_ids: List of planet IDs that are comets
+            - comets: Comet data with paths
+            - initial_planets: Initial planet positions for orbit prediction
         configuration: Game configuration
     
     Returns:
         List of moves, each move is [from_planet_id, direction_angle, num_ships]
     """
-    player_id = observation["player"]
-    planets = observation["planets"]
-    fleets = observation.get("fleets", [])
-    
-    # Get my planets
-    my_planets = [p for p in planets if p[1] == player_id]
-    
-    # Get enemy and neutral planets
-    enemy_planets = [p for p in planets if p[1] != player_id and p[1] != -1]
-    neutral_planets = [p for p in planets if p[1] == -1]
-    
-    moves = []
-    
-    # Simple strategy: Attack nearest enemy or neutral planet
-    for my_planet in my_planets:
-        planet_id = my_planet[0]
-        x, y = my_planet[2], my_planet[3]
-        ships = my_planet[5]
-        
-        # Find target (prioritize enemy, then neutral)
-        target = None
-        min_dist = float('inf')
-        
-        # Check enemy planets
-        for enemy in enemy_planets:
-            dist = math.sqrt((enemy[2] - x) ** 2 + (enemy[3] - y) ** 2)
-            if dist < min_dist:
-                min_dist = dist
-                target = enemy
-        
-        # Check neutral planets if no enemy found
-        if target is None:
-            for neutral in neutral_planets:
-                dist = math.sqrt((neutral[2] - x) ** 2 + (neutral[3] - y) ** 2)
-                if dist < min_dist:
-                    min_dist = dist
-                    target = neutral
-        
-        # Send ships if we have enough and found a target
-        if target and ships > 10:
-            target_x, target_y = target[2], target[3]
-            dx = target_x - x
-            dy = target_y - y
-            angle = math.atan2(dy, dx)
-            
-            # Send half of the ships
-            num_ships = ships // 2
-            moves.append([planet_id, angle, num_ships])
-    
-    return moves
+    return heuristic_agent_func(observation, configuration)
 
 
-# For local testing
+def get_agent() -> HeuristicAgent:
+    """
+    Get a new instance of the HeuristicAgent.
+    
+    Useful for local testing and evaluation.
+    
+    Returns:
+        HeuristicAgent instance
+    """
+    return HeuristicAgent()
+
+
 if __name__ == "__main__":
-    # Test observation
+    print("Orbit Wars Heuristic Agent")
+    print("=" * 50)
+    
     test_obs = {
         "player": 0,
         "planets": [
-            [0, 0, 20.0, 20.0, 2.0, 50, 3],   # My planet
-            [1, 1, 80.0, 80.0, 2.0, 30, 2],   # Enemy planet
-            [2, -1, 50.0, 20.0, 1.5, 20, 1],  # Neutral planet
+            [0, 0, 20.0, 20.0, 2.0, 50, 3],
+            [1, 1, 80.0, 80.0, 2.0, 30, 2],
+            [2, -1, 50.0, 20.0, 1.5, 20, 1],
+            [3, 0, 30.0, 70.0, 2.2, 40, 4],
+            [4, 2, 70.0, 30.0, 1.8, 25, 2],
         ],
-        "fleets": [],
-        "angular_velocity": 0.03
+        "fleets": [
+            [0, 1, 60.0, 60.0, 4.5, 1, 15],
+        ],
+        "angular_velocity": 0.03,
+        "comet_planet_ids": [],
+        "comets": [],
+        "initial_planets": [
+            [0, 0, 20.0, 20.0, 2.0, 50, 3],
+            [1, 1, 80.0, 80.0, 2.0, 30, 2],
+            [2, -1, 50.0, 20.0, 1.5, 20, 1],
+            [3, 0, 30.0, 70.0, 2.2, 40, 4],
+            [4, 2, 70.0, 30.0, 1.8, 25, 2],
+        ],
     }
     
     test_config = {}
     
-    result = agent(test_obs, test_config)
-    print("Agent moves:", result)
+    agent_instance = get_agent()
+    result = agent_instance.act(test_obs)
+    print(f"Agent moves: {result}")
+    
+    direct_result = agent(test_obs, test_config)
+    print(f"Direct call result: {direct_result}")
+    
+    print("\n" + "=" * 50)
+    print("Test completed successfully!")
