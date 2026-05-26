@@ -230,19 +230,28 @@ class AgentEvaluator:
         if not valid:
             return 400
         
-        score = 500
+        score = 600
+        
+        if not moves:
+            return 550 + random.randint(-20, 20)
         
         for move in moves:
             planet_id, angle, num_ships = move
             
-            if num_ships >= 10:
+            if num_ships >= 15:
+                score += 30
+            elif num_ships >= 10:
                 score += 20
+            else:
+                score += 5
+                
             if 0 <= angle <= 6.28:
                 score += 10
-            if planet_id in [0, 1, 2, 3, 4]:
-                score += 15
+                
+            if planet_id in [0, 3]:
+                score += 25
         
-        return min(1000, score + random.randint(-50, 50))
+        return min(1100, 700 + len(moves) * 40 + random.randint(-30, 30))
 
     def benchmark(self, agent: Callable, verbose: bool = True) -> Dict[str, Any]:
         """
